@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:scan/scan.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ScanQrView extends StatefulWidget {
   const ScanQrView({Key? key}) : super(key: key);
@@ -13,87 +15,42 @@ class ScanQrView extends StatefulWidget {
 }
 
 class _ScanQrViewState extends State<ScanQrView> {
-  Barcode? result;
-  QRViewController? controller;
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  bool qrFound = false;
-  String resultString = "";
-  void _onQRViewCreated(QRViewController controller) {
-    setState(() => this.controller = controller);
-    controller.scannedDataStream.listen((scanData) {
-      setState(() => result = scanData);
-      if (result != null) {
-        //  controller.pauseCamera();
-
-        if (result!.code != null) {
-          qrFound = true;
-          resultString = result!.code!;
-        }
-      }
-    });
-  }
-
-  // In order to get hot reload to work we need to pause the camera if the platform
-  // is android, or resume the camera if the platform is iOS.
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller!.pauseCamera();
-    } else if (Platform.isIOS) {
-      controller!.resumeCamera();
-    }
-  }
-
-  void readQr() async {
-    if (result != null) {
-      controller!.pauseCamera();
-
-      if (result!.code != null) {
-        qrFound = true;
-        resultString = result!.code!;
-      }
-    }
-  }
+  ScanController controller = ScanController();
+  String qrcode = 'Unknown';
 
   @override
   Widget build(BuildContext context) {
-    //   readQr();
     return Scaffold(
-      body: qrFound
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Text(resultString),
-                ),
-                MaterialButton(
-                  color: Colors.amber,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Back"),
-                ),
-              ],
-            )
-          : QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-              overlay: QrScannerOverlayShape(
-                borderColor: Colors.orange,
-                borderRadius: 10,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutSize: 250,
-              ),
-            ),
+      body: Center(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width, // custom wrap size
+          height: 250,
+          child: ScanView(
+            controller: controller,
+// custom scan area, if set to 1.0, will scan full area
+            scanAreaScale: .7,
+            scanLineColor: Colors.green.shade400,
+            onCapture: (data) async {
+              String email = data.split(",")[0].split(":")[1];
+              String password = data.split(",")[1].split(":")[1];
+
+              String url =
+                  "https://dgmentorparticipantdemo.web.app/?email=$email&password=$password#/minified:mh";
+
+              await launchUrl(
+                Uri.parse(url),
+                mode: LaunchMode.externalApplication,
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 
   @override
   void dispose() {
-    controller?.dispose();
+    controller.pause();
     super.dispose();
   }
 }

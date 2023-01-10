@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:qr_flutter/qr_flutter.dart';
@@ -20,14 +21,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final TextEditingController password = TextEditingController();
 
-  final TextEditingController courseName = TextEditingController();
-
   final _key = GlobalKey<FormState>();
 
   GlobalKey globalKey = GlobalKey();
 
-  String get output =>
-      'Name : ${name.text}\nPassword : ${password.text}\nCourse Name : ${courseName.text}';
+  String get output => 'Name : ${name.text},\nPassword : ${password.text}\n';
 
   bool shouldGenerate = false;
   bool shouldLoad = false;
@@ -50,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 textEditForField(name, "Name"),
                 textEditForField(password, "Password", password: true),
-                textEditForField(courseName, "Course Name"),
                 MaterialButton(
                   color: Colors.amber,
                   elevation: 0,
@@ -67,19 +64,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (shouldGenerate)
                   RepaintBoundary(
                     key: globalKey,
-                    child: QrImage(
-                      data: output,
-                      version: QrVersions.auto,
-                      size: 320,
-                      gapless: false,
-                      errorStateBuilder: (cxt, err) {
-                        return Center(
-                          child: Text(
-                            "Uh oh! Something went wrong... $err",
-                            textAlign: TextAlign.center,
-                          ),
-                        );
-                      },
+                    child: Container(
+                      color: Colors.white,
+                      child: QrImage(
+                        data: output,
+                        version: QrVersions.auto,
+                        size: 320,
+                        gapless: false,
+                        errorStateBuilder: (cxt, err) {
+                          return Center(
+                            child: Text(
+                              "Uh oh! Something went wrong... $err",
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 if (shouldGenerate)
@@ -133,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
       shouldLoad = true;
     });
     try {
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
       final RenderRepaintBoundary boundary = globalKey.currentContext!
           .findRenderObject()! as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage();
@@ -140,8 +141,10 @@ class _HomeScreenState extends State<HomeScreen> {
           await image.toByteData(format: ui.ImageByteFormat.png);
       final Uint8List pngBytes = byteData!.buffer.asUint8List();
       final tempDir = await getTemporaryDirectory();
-      final file = await File('${tempDir.path}/image.png').create();
-      await file.writeAsBytes(pngBytes);
+      final file = await File('${tempDir.path}/$timestamp.png').create();
+      // await file.writeAsBytes(pngBytes);
+
+      ImageGallerySaver.saveImage(pngBytes, quality: 60, name: "$timestamp");
 
       const SnackBar snackBar = SnackBar(
         content: Text("Image saved"),
