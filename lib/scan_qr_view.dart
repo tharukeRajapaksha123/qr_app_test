@@ -35,7 +35,7 @@ class _ScanQrViewState extends State<ScanQrView> {
               String password = data.split(",")[1].split(":")[1];
 
               String url =
-                  "https://dgmentorparticipantdemo.web.app/?email=$email&password=$password#/minified:mh";
+                  "https://dgmentorparticipantdemo.web.app/signin?email=$email&password=$password";
 
               await launchUrl(
                 Uri.parse(url),

@@ -86,7 +86,7 @@ class _ChooseOptionViewState extends State<ChooseOptionView> {
         String password = result.split(",")[1].split(":")[1];
 
         String url =
-            "https://dgmentorparticipantdemo.web.app/?email=$email&password=$password#/minified:mh";
+            "https://dgmentorparticipantdemo.web.app/signin?email=$email&password=$password";
 
         final Uri uri = Uri.parse(url);
 
