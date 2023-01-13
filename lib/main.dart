@@ -101,7 +101,7 @@ class MyHome extends StatelessWidget {
           children: [
             MaterialButton(
               color: Colors.amber,
-              onPressed: () {
+              onPressed: () async {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => HomeScreen()));
               },

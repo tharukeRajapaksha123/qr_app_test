@@ -31,16 +31,20 @@ class _ScanQrViewState extends State<ScanQrView> {
             scanAreaScale: .7,
             scanLineColor: Colors.green.shade400,
             onCapture: (data) async {
-              String email = data.split(",")[0].split(":")[1];
-              String password = data.split(",")[1].split(":")[1];
+              String email = data.split(",")[0];
+              String password = data.split(",")[1];
 
-              String url =
-                  "https://dgmentorparticipantdemo.web.app/signin?email=$email&password=$password";
+              Uri url = Uri.parse(
+                  "https://dgmentorparticipantdemo.web.app/#/signin?email=$email&password=$password");
 
-              await launchUrl(
-                Uri.parse(url),
-                mode: LaunchMode.externalApplication,
-              );
+              if (await canLaunchUrl(url)) {
+                {
+                  await launchUrl(
+                    url,
+                    mode: LaunchMode.externalApplication,
+                  );
+                }
+              }
             },
           ),
         ),

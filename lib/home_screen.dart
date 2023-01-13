@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -25,7 +26,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   GlobalKey globalKey = GlobalKey();
 
-  String get output => 'Name : ${name.text},\nPassword : ${password.text}\n';
+  String encryptedPassword() {
+    String credentials = password.text;
+    Codec<String, String> stringToBase64 = utf8.fuse(base64);
+    String encoded =
+        stringToBase64.encode(credentials); // dXNlcm5hbWU6cGFzc3dvcmQ=
+    //  String decoded = stringToBase64.decode(encoded);
+    return encoded;
+  }
+
+  String get output => '${name.text},${encryptedPassword()}';
 
   bool shouldGenerate = false;
   bool shouldLoad = false;

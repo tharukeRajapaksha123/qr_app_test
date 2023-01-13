@@ -82,18 +82,16 @@ class _ChooseOptionViewState extends State<ChooseOptionView> {
     String? result = await Scan.parse(file);
     if (result != null) {
       try {
-        String email = result.split(",")[0].split(":")[1];
-        String password = result.split(",")[1].split(":")[1];
+        String email = result.split(",")[0];
+        String password = result.split(",")[1];
 
-        String url =
-            "https://dgmentorparticipantdemo.web.app/signin?email=$email&password=$password";
-
-        final Uri uri = Uri.parse(url);
-
-        if (await canLaunchUrl(uri)) {
+        Uri url = Uri.parse(
+            "https://dgmentorparticipantdemo.web.app/#/signin?email=$email&password=$password");
+        print(url);
+        if (await canLaunchUrl(url)) {
           {
             await launchUrl(
-              uri,
+              url,
               mode: LaunchMode.externalApplication,
             );
           }
